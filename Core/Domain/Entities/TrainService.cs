@@ -1,6 +1,6 @@
 ﻿namespace RailBook.Core.Domain.Entities
 {
-    public class Service
+    public class TrainService
     {
         public int ServiceId { get; set; }    // Primary Key
         public string TrainName { get; set; } = string.Empty;

@@ -1,10 +1,17 @@
+﻿using AutoMapper;
+using Microsoft.EntityFrameworkCore;
+using RailBook.Application.Services;
 using RailBook.Core.Application.Mapping;
-using AutoMapper;
+using RailBook.Core.Application.Services;
+using RailBook.Core.Domain.Repositories;
+using RailBook.External.Persistence.Database;
+using RailBook.External.Persistence.Repositories;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
+builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 // Register AutoMapper with DI container 
@@ -12,6 +19,27 @@ builder.Services.AddAutoMapper(cfg =>
 {
     cfg.AddProfile<MappingProfile>();
 });
+
+builder.Services.AddDbContext<ApplicationDbContext>(options =>
+    options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection"))
+);
+
+
+// 4️⃣ Register Repositories (DI)
+builder.Services.AddScoped<IUserRepository, UserRepository>();
+builder.Services.AddScoped<IPassengerRepository, PassengerRepository>();
+builder.Services.AddScoped<ITrainServiceRepository, TrainServiceRepository>();
+builder.Services.AddScoped<IBookingRepository, BookingRepository>();
+builder.Services.AddScoped<IInvoiceRepository, InvoiceRepository>();
+builder.Services.AddScoped<IInvoiceDetailsRepository, InvoiceDetailsRepository>();
+
+// 5️⃣ Register Services (DI)
+builder.Services.AddScoped<UserService>();
+builder.Services.AddScoped<PassengerService>();
+builder.Services.AddScoped<TrainServiceService>();
+builder.Services.AddScoped<BookingService>();
+builder.Services.AddScoped<InvoiceService>();
+builder.Services.AddScoped<InvoiceDetailsService>();
 
 
 var app = builder.Build();
@@ -23,29 +51,8 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
-var summaries = new[]
-{
-    "Freezing", "Bracing", "Chilly", "Cool", "Mild", "Warm", "Balmy", "Hot", "Sweltering", "Scorching"
-};
 
-app.MapGet("/weatherforecast", () =>
-{
-    var forecast = Enumerable.Range(1, 5).Select(index =>
-        new WeatherForecast
-        (
-            DateOnly.FromDateTime(DateTime.Now.AddDays(index)),
-            Random.Shared.Next(-20, 55),
-            summaries[Random.Shared.Next(summaries.Length)]
-        ))
-        .ToArray();
-    return forecast;
-})
-.WithName("GetWeatherForecast")
-.WithOpenApi();
+
 
 app.Run();
 
-internal record WeatherForecast(DateOnly Date, int TemperatureC, string? Summary)
-{
-    public int TemperatureF => 32 + (int)(TemperatureC / 0.5556);
-}

@@ -10,7 +10,7 @@ namespace RailBook.External.Persistence.Database
 
         public DbSet<User> Users => Set<User>();
         public DbSet<Passenger> Passengers => Set<Passenger>();
-        public DbSet<Service> Services => Set<Service>();
+        public DbSet<TrainService> TrainServices => Set<TrainService>();
         public DbSet<Booking> Bookings => Set<Booking>();
         public DbSet<Invoice> Invoices => Set<Invoice>();
         public DbSet<InvoiceDetails> InvoiceDetails => Set<InvoiceDetails>();
@@ -42,7 +42,7 @@ namespace RailBook.External.Persistence.Database
             });
 
             // ---------------- Service (Train) ----------------
-            modelBuilder.Entity<Service>(entity =>
+            modelBuilder.Entity<TrainService>(entity =>
             {
                 entity.HasKey(s => s.ServiceId);
                 entity.Property(s => s.TrainName).IsRequired().HasMaxLength(100);
@@ -74,8 +74,8 @@ namespace RailBook.External.Persistence.Database
                       .OnDelete(DeleteBehavior.Cascade);
 
                 entity.HasOne<Invoice>()
-                      .WithMany()
-                      .HasForeignKey(b => b.InvoiceId)
+                      .WithOne()
+                      .HasForeignKey<Booking>(b => b.InvoiceId)
                       .OnDelete(DeleteBehavior.Restrict);
 
                 entity.HasOne<User>()
@@ -113,8 +113,8 @@ namespace RailBook.External.Persistence.Database
                 entity.Property(d => d.InvoiceDate).IsRequired();
 
                 entity.HasOne<Invoice>()
-                      .WithMany()
-                      .HasForeignKey(d => d.InvoiceId)
+                      .WithOne()
+                      .HasForeignKey<InvoiceDetails>(d => d.InvoiceId)
                       .OnDelete(DeleteBehavior.Cascade);
 
                 entity.HasOne<User>()

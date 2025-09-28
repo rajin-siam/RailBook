@@ -24,9 +24,9 @@ namespace RailBook.Core.Application.Mapping
             CreateMap<Passenger, UpdatePassengerDto>().ReverseMap();
 
             // Service
-            CreateMap<Service, ServiceDto>().ReverseMap();
-            CreateMap<Service, CreateServiceDto>().ReverseMap();
-            CreateMap<Service, UpdateServiceDto>().ReverseMap();
+            CreateMap<TrainService, TrainServiceDto>().ReverseMap();
+            CreateMap<TrainService, CreateTrainServiceDto>().ReverseMap();
+            CreateMap<TrainService, UpdateTrainServiceDto>().ReverseMap();
 
             // Booking
             CreateMap<Booking, BookingDto>().ReverseMap();

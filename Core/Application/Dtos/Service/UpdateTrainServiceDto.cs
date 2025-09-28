@@ -1,6 +1,6 @@
 ﻿namespace RailBook.Core.Application.Dtos.Service
 {
-    public class UpdateServiceDto
+    public class UpdateTrainServiceDto
     {
         public string TrainName { get; set; } = string.Empty;
         public string From { get; set; } = string.Empty;
