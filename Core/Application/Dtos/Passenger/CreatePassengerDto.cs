@@ -1,9 +1,12 @@
-﻿namespace RailBook.Core.Application.Dtos.Passenger
+﻿using RailBook.Core.Application.Dtos.Service;
+
+namespace RailBook.Core.Application.Dtos.Passenger
 {
     public class CreatePassengerDto
     {
         public string Name { get; set; } = string.Empty;
+        public int Age { get; set; }
         public string Gender { get; set; } = string.Empty;
-        public int CreatedBy { get; set; }
+        public List<CreateTrainServiceDto>? TrainServices { get; set; }
     }
 }

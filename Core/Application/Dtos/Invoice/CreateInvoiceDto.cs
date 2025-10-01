@@ -1,9 +1,11 @@
-﻿namespace RailBook.Core.Application.Dtos.Invoice
+﻿using RailBook.Core.Application.Dtos.InvoiceDetails;
+
+namespace RailBook.Core.Application.Dtos.Invoice
 {
     public class CreateInvoiceDto
     {
-        public int PassengerId { get; set; }
-        public int UserId { get; set; }
-        public int CreatedBy { get; set; }
+        public int BookingId { get; set; }
+        public int TotalAmount { get; set; }
+        public CreateInvoiceDetailsDto? InvoiceDetails { get; set; }
     }
 }

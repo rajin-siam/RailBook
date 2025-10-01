@@ -39,7 +39,7 @@ namespace RailBook.External.Api.Endpoints
         {
             var serviceEntity = _mapper.Map<TrainService>(dto);
             await _trainServiceService.AddTrainAsync(serviceEntity);
-            return CreatedAtAction(nameof(GetById), new { id = serviceEntity.ServiceId }, _mapper.Map<TrainServiceDto>(serviceEntity));
+            return CreatedAtAction(nameof(GetById), new { id = serviceEntity.Id }, _mapper.Map<TrainServiceDto>(serviceEntity));
         }
 
         [HttpPut("{id}")]

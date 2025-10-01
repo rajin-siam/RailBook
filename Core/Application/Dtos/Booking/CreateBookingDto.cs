@@ -1,11 +1,12 @@
-﻿namespace RailBook.Core.Application.Dtos.Booking
+﻿using RailBook.Core.Application.Dtos.Passenger;
+
+namespace RailBook.Core.Application.Dtos.Booking
 {
     public class CreateBookingDto
     {
-        public int PassengerId { get; set; }
-        public DateTime BookingDate { get; set; }
-        public string Status { get; set; } = string.Empty;
-        public int InvoiceId { get; set; }
-        public int CreatedBy { get; set; }
+        public string Source { get; set; } = string.Empty;
+        public string Destination { get; set; } = string.Empty;
+        public int PerTicketPrice { get; set; }
+        public List<CreatePassengerDto> Passengers { get; set; } = [];
     }
 }

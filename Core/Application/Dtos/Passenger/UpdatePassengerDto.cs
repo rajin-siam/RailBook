@@ -2,7 +2,8 @@
 {
     public class UpdatePassengerDto
     {
-        public string Name { get; set; } = string.Empty;
-        public string Gender { get; set; } = string.Empty;
+        public string? Name { get; set; }
+        public int? Age { get; set; }
+        public string? Gender { get; set; }
     }
 }

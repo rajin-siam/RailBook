@@ -2,6 +2,8 @@
 {
     public class UpdateInvoiceDetailsDto
     {
-        public decimal TotalPrice { get; set; }
+        public int? TotalPrice { get; set; }
+        public DateTime? InvoiceDate { get; set; }
+        public string? InvoiceDescription { get; set; }
     }
 }

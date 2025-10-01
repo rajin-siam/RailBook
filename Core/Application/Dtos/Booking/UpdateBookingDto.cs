@@ -2,6 +2,12 @@
 {
     public class UpdateBookingDto
     {
-        public string Status { get; set; } = string.Empty;
+        public DateTime? BookingDate { get; set; }
+        public string? Status { get; set; }
+        public string? Source { get; set; }
+        public string? Destination { get; set; }
+        public int? PerTicketPrice { get; set; }
     }
 }
+
+

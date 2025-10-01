@@ -2,6 +2,6 @@
 {
     public class UpdateInvoiceDto
     {
-        public int PassengerId { get; set; }
+        public int? TotalAmount { get; set; }
     }
 }

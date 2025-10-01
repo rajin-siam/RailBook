@@ -39,7 +39,7 @@ namespace RailBook.Api.Controllers
         {
             var invoice = _mapper.Map<Invoice>(dto);
             await _service.AddInvoiceAsync(invoice);
-            return CreatedAtAction(nameof(GetById), new { id = invoice.InvoiceId }, _mapper.Map<InvoiceDto>(invoice));
+            return CreatedAtAction(nameof(GetById), new { id = invoice.Id }, _mapper.Map<InvoiceDto>(invoice));
         }
 
         [HttpPut("{id}")]

@@ -1,4 +1,6 @@
-﻿using RailBook.Core.Domain.Entities;
+﻿using AutoMapper;
+using RailBook.Core.Application.Dtos.Booking;
+using RailBook.Core.Domain.Entities;
 using RailBook.Core.Domain.Repositories;
 
 
@@ -7,10 +9,14 @@ namespace RailBook.Core.Application.Services
     public class BookingService
     {
         private readonly IBookingRepository _bookingRepository;
+        private readonly IMapper _mapper;
+        private readonly InvoiceService _invoiceService;
 
-        public BookingService(IBookingRepository bookingRepository)
+        public BookingService(IBookingRepository bookingRepository, InvoiceService invoiceService, IMapper mapper)
         {
             _bookingRepository = bookingRepository;
+            _mapper = mapper;
+            _invoiceService = invoiceService;
         }
 
         public async Task<List<Booking>> GetAllBookingsAsync()
@@ -23,9 +29,26 @@ namespace RailBook.Core.Application.Services
             return await _bookingRepository.GetByIdAsync(id);
         }
 
-        public async Task AddBookingAsync(Booking booking)
+        public async Task<Booking?> AddBookingAsync(CreateBookingDto dto)
         {
+            var booking = _mapper.Map<Booking>(dto);
+            booking.Status = "Confirmed";
+            booking.BookingDate = DateTime.UtcNow;
+            booking.CreatedBy = 1;
+            booking.CreatedAt = DateTime.UtcNow;
+
+            if (booking.Passengers != null && booking.Passengers.Any())
+            {
+                foreach (var passenger in booking.Passengers)
+                {
+                    passenger.CreatedBy = booking.CreatedBy; // or current user
+                    passenger.CreatedAt = DateTime.UtcNow;
+                }
+            }
+            booking.Invoice = await _invoiceService.GenerateInvoiceAsync(booking);
             await _bookingRepository.AddAsync(booking);
+            return booking;
+
         }
 
         public async Task UpdateBookingAsync(Booking booking)

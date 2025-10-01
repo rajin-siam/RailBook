@@ -40,7 +40,7 @@ namespace RailBook.External.Api.Endpoints
         {
             var passenger = _mapper.Map<Passenger>(dto);
             await _service.AddPassengerAsync(passenger);
-            return CreatedAtAction(nameof(GetById), new { id = passenger.PassengerId }, _mapper.Map<PassengerDto>(passenger));
+            return CreatedAtAction(nameof(GetById), new { id = passenger.Id }, _mapper.Map<PassengerDto>(passenger));
         }
 
         [HttpPut("{id}")]

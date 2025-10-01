@@ -38,27 +38,42 @@ namespace RailBook.External.Api.Endpoints
         [HttpPost]
         public async Task<ActionResult<BookingDto>> Create([FromBody] CreateBookingDto dto)
         {
-            var booking = _mapper.Map<Booking>(dto);
-            await _service.AddBookingAsync(booking);
-            return CreatedAtAction(nameof(GetById), new { id = booking.BookingId }, _mapper.Map<BookingDto>(booking));
+            
+            var createdBooking = await _service.AddBookingAsync(dto);
+
+            if (createdBooking == null)
+            {
+                return NotFound();
+            }
+
+            // Map the complete entity back to DTO
+            var bookingDto = _mapper.Map<BookingDto>(createdBooking);
+
+
+            // Return 201 Created with full BookingDto in response body
+            return CreatedAtAction(
+                nameof(GetById),
+                new { id = createdBooking.Id },
+                bookingDto
+            );
         }
 
-        [HttpPut("{id}")]
-        public async Task<IActionResult> Update(int id, [FromBody] UpdateBookingDto dto)
-        {
-            var booking = await _service.GetBookingByIdAsync(id);
-            if (booking == null) return NotFound();
+        //[HttpPut("{id}")]
+        //public async Task<IActionResult> Update(int id, [FromBody] UpdateBookingDto dto)
+        //{
+        //    var booking = await _service.GetBookingByIdAsync(id);
+        //    if (booking == null) return NotFound();
 
-            _mapper.Map(dto, booking);
-            await _service.UpdateBookingAsync(booking);
-            return NoContent();
-        }
+        //    _mapper.Map(dto, booking);
+        //    await _service.UpdateBookingAsync(booking);
+        //    return NoContent();
+        //}
 
-        [HttpDelete("{id}")]
-        public async Task<IActionResult> Delete(int id)
-        {
-            await _service.DeleteBookingAsync(id);
-            return NoContent();
-        }
+        //[HttpDelete("{id}")]
+        //public async Task<IActionResult> Delete(int id)
+        //{
+        //    await _service.DeleteBookingAsync(id);
+        //    return NoContent();
+        //}
     }
 }

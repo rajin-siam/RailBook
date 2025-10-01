@@ -36,5 +36,35 @@ namespace RailBook.Core.Application.Services
         {
             await _invoiceRepository.DeleteAsync(id);
         }
+
+        public async Task<Invoice> GenerateInvoiceAsync(Booking booking)
+        {
+            if (booking == null)
+                throw new Exception("Booking not found");
+
+            // Step 1: Base fare = ticket price × number of passengers
+            int passengerCount = booking.Passengers.Count;
+            int baseFare = booking.PerTicketPrice * passengerCount;
+
+            // Step 2: Extra services cost (sum for all passengers)
+            int serviceCost = booking.Passengers
+                .SelectMany(p => p.TrainServices)
+                .Sum(s => s.Price);   // assumes TrainService has a Price field
+
+            int totalAmount = baseFare + serviceCost;
+
+
+
+            // Step 3: Create Invoice
+            var invoice = new Invoice
+            {
+                BookingId = booking.Id,
+                TotalAmount = totalAmount,
+                CreatedBy = 1,
+                CreatedAt = DateTime.UtcNow
+            };
+            //await AddInvoiceAsync(invoice);
+            return invoice; 
+        }
     }
 }
