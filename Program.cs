@@ -41,7 +41,22 @@ builder.Services.AddScoped<BookingService>();
 builder.Services.AddScoped<InvoiceService>();
 builder.Services.AddScoped<InvoiceDetailsService>();
 
+
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowAngularApp",
+        policy =>
+        {
+            policy.WithOrigins("http://localhost:4200")
+                  .AllowAnyHeader()
+                  .AllowAnyMethod();
+        });
+});
+
+
 var app = builder.Build();
+
+app.UseCors("AllowAngularApp");
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
