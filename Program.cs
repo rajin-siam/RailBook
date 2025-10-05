@@ -1,11 +1,10 @@
 ﻿using AutoMapper;
 using Microsoft.EntityFrameworkCore;
-using RailBook.Application.Services;
-using RailBook.Core.Application.Mapping;
-using RailBook.Core.Application.Services;
-using RailBook.Core.Domain.Repositories;
-using RailBook.External.Persistence.Database;
-using RailBook.External.Persistence.Repositories;
+using RailBook.DataAccess.Database;
+using RailBook.DataAccess.Implementations;
+using RailBook.DataAccess.Interfaces;
+using RailBook.Manager.Implementations;
+using RailBook.Mapping;
 
 var builder = WebApplication.CreateBuilder(args);
 

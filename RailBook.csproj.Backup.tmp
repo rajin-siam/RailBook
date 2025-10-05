@@ -7,21 +7,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Compile Remove="Core\**" />
-    <Compile Remove="External\**" />
-    <Compile Remove="Manager\Interfaces\NewFolder\**" />
-    <Content Remove="Core\**" />
-    <Content Remove="External\**" />
-    <Content Remove="Manager\Interfaces\NewFolder\**" />
-    <EmbeddedResource Remove="Core\**" />
-    <EmbeddedResource Remove="External\**" />
-    <EmbeddedResource Remove="Manager\Interfaces\NewFolder\**" />
-    <None Remove="Core\**" />
-    <None Remove="External\**" />
-    <None Remove="Manager\Interfaces\NewFolder\**" />
-  </ItemGroup>
-
-  <ItemGroup>
     <PackageReference Include="AutoMapper" Version="15.0.1" />
     <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="8.0.19" />
     <PackageReference Include="Microsoft.EntityFrameworkCore" Version="9.0.9" />
@@ -36,6 +21,10 @@
     </PackageReference>
     <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="9.0.4" />
     <PackageReference Include="Swashbuckle.AspNetCore" Version="6.6.2" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="DataAccess\Interfaces\" />
   </ItemGroup>
 
 </Project>

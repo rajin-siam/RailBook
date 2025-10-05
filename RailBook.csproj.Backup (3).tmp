@@ -9,16 +9,12 @@
   <ItemGroup>
     <Compile Remove="Core\**" />
     <Compile Remove="External\**" />
-    <Compile Remove="Manager\Interfaces\NewFolder\**" />
     <Content Remove="Core\**" />
     <Content Remove="External\**" />
-    <Content Remove="Manager\Interfaces\NewFolder\**" />
     <EmbeddedResource Remove="Core\**" />
     <EmbeddedResource Remove="External\**" />
-    <EmbeddedResource Remove="Manager\Interfaces\NewFolder\**" />
     <None Remove="Core\**" />
     <None Remove="External\**" />
-    <None Remove="Manager\Interfaces\NewFolder\**" />
   </ItemGroup>
 
   <ItemGroup>
