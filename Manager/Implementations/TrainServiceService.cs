@@ -1,8 +1,11 @@
-﻿using RailBook.DataAccess.Interfaces;
+﻿using Mapster;
+using RailBook.DataAccess.Interfaces;
+using RailBook.Dtos.Service;
+using RailBook.Manager.Interfaces;
 
 namespace RailBook.Manager.Implementations
 {
-    public class TrainServiceService
+    public class TrainServiceService : ITrainServiceService
     {
         private readonly ITrainServiceRepository _trainServiceRepository;
 
@@ -11,29 +14,32 @@ namespace RailBook.Manager.Implementations
             _trainServiceRepository = serviceRepository;
         }
 
-        public async Task<List<TrainService>> GetAllTrainsAsync()
+        public async Task<List<TrainServiceDto>> GetAllTrainsAsync()
         {
-            return await _trainServiceRepository.GetAllAsync();
+            var trainServiceList =  await _trainServiceRepository.GetAllAsync();
+            return trainServiceList.Adapt<List<TrainServiceDto>>();
         }
 
-        public async Task<TrainService?> GetTrainByIdAsync(int id)
+        public async Task<TrainServiceDto?> GetTrainByIdAsync(int id)
         {
-            return await _trainServiceRepository.GetByIdAsync(id);
+            return (await _trainServiceRepository.GetByIdAsync(id)).Adapt<TrainServiceDto>();
         }
 
-        public async Task AddTrainAsync(TrainService service)
+        public async Task AddTrainAsync(TrainServiceDto serviceDto)
         {
+            var service = serviceDto.Adapt<TrainService>();
             await _trainServiceRepository.AddAsync(service);
         }
 
-        public async Task UpdateTrainAsync(TrainService service)
+        public async Task UpdateTrainAsync(TrainServiceDto serviceDto)
         {
-            await _trainServiceRepository.UpdateAsync(service);
+            await _trainServiceRepository.UpdateAsync(serviceDto.Adapt<TrainService>());
         }
 
         public async Task DeleteTrainAsync(int id)
         {
             await _trainServiceRepository.DeleteAsync(id);
         }
+
     }
 }

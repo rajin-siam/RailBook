@@ -1,4 +1,4 @@
-﻿namespace RailBook.Domain.Dtos.User
+﻿namespace RailBook.Dtos.User
 {
     public class UserDto
     {

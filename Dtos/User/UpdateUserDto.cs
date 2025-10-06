@@ -1,9 +1,8 @@
-﻿namespace RailBook.Domain.Dtos.User
+﻿namespace RailBook.Dtos.User
 {
-    public class CreateUserDto
+    public class UpdateUserDto
     {
         public string Name { get; set; } = string.Empty;
         public string Email { get; set; } = string.Empty;
-        public string Password { get; set; } = string.Empty;
     }
 }

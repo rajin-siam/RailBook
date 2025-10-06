@@ -1,7 +1,8 @@
 ﻿using AutoMapper;
 using Microsoft.AspNetCore.Mvc;
-using RailBook.Domain.Dtos.Passenger;
+using RailBook.Dtos.Passenger;
 using RailBook.Manager.Implementations;
+using RailBook.Manager.Interfaces;
 
 
 namespace RailBook.Controllers
@@ -10,10 +11,10 @@ namespace RailBook.Controllers
     [ApiController]
     public class PassengersController : ControllerBase
     {
-        private readonly PassengerService _service;
+        private readonly IPassengerService _service;
         private readonly IMapper _mapper;
 
-        public PassengersController(PassengerService service, IMapper mapper)
+        public PassengersController(IPassengerService service, IMapper mapper)
         {
             _service = service;
             _mapper = mapper;
@@ -34,13 +35,6 @@ namespace RailBook.Controllers
             return Ok(_mapper.Map<PassengerDto>(passenger));
         }
 
-        [HttpPost]
-        public async Task<ActionResult<PassengerDto>> Create([FromBody] CreatePassengerDto dto)
-        {
-            var passenger = _mapper.Map<Passenger>(dto);
-            await _service.AddPassengerAsync(passenger);
-            return CreatedAtAction(nameof(GetById), new { id = passenger.Id }, _mapper.Map<PassengerDto>(passenger));
-        }
 
         [HttpPut("{id}")]
         public async Task<IActionResult> Update(int id, [FromBody] UpdatePassengerDto dto)

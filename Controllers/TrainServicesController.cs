@@ -1,7 +1,8 @@
 ﻿using AutoMapper;
 using Microsoft.AspNetCore.Mvc;
-using RailBook.Domain.Dtos.Service;
+using RailBook.Dtos.Service;
 using RailBook.Manager.Implementations;
+using RailBook.Manager.Interfaces;
 
 namespace RailBook.Controllers
 {
@@ -9,10 +10,10 @@ namespace RailBook.Controllers
     [ApiController]
     public class TrainServicesController : ControllerBase
     {
-        private readonly TrainServiceService _trainServiceService;
+        private readonly ITrainServiceService _trainServiceService;
         private readonly IMapper _mapper;
 
-        public TrainServicesController(TrainServiceService service, IMapper mapper)
+        public TrainServicesController(ITrainServiceService service, IMapper mapper)
         {
             _trainServiceService = service;
             _mapper = mapper;
@@ -33,13 +34,13 @@ namespace RailBook.Controllers
             return Ok(_mapper.Map<TrainServiceDto>(serviceEntity));
         }
 
-        [HttpPost]
-        public async Task<ActionResult<CreateTrainServiceDto>> Create([FromBody] CreateTrainServiceDto dto)
-        {
-            var serviceEntity = _mapper.Map<TrainService>(dto);
-            await _trainServiceService.AddTrainAsync(serviceEntity);
-            return CreatedAtAction(nameof(GetById), new { id = serviceEntity.Id }, _mapper.Map<TrainServiceDto>(serviceEntity));
-        }
+        //[HttpPost]
+        //public async Task<ActionResult<CreateTrainServiceDto>> Create([FromBody] CreateTrainServiceDto dto)
+        //{
+        //    var serviceEntity = _mapper.Map<TrainService>(dto);
+        //    await _trainServiceService.AddTrainAsync(serviceEntity);
+        //    return CreatedAtAction(nameof(GetById), new { id = serviceEntity.Id }, _mapper.Map<TrainServiceDto>(serviceEntity));
+        //}
 
         [HttpPut("{id}")]
         public async Task<IActionResult> Update(int id, [FromBody] UpdateTrainServiceDto dto)

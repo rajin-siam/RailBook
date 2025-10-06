@@ -1,6 +1,6 @@
-﻿using RailBook.Domain.Dtos.InvoiceDetails;
+﻿using RailBook.Dtos.InvoiceDetails;
 
-namespace RailBook.Domain.Dtos.Invoice
+namespace RailBook.Dtos.Invoice
 {
     public class InvoiceDto
     {

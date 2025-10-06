@@ -1,15 +1,15 @@
-﻿
-using RailBook.Domain.Dtos.Booking;
+﻿using RailBook.ApiModels;
 using RailBook.Domain.Entities;
+using RailBook.Dtos.Booking;
 
 namespace RailBook.Manager.Interfaces
 {
     public interface IBookingService
     {
-        Task<List<Booking>> GetAllBookingsAsync();
-        Task<Booking?> GetBookingByIdAsync(int id);
-        Task<Booking?> AddBookingAsync(CreateBookingDto dto);
-        Task UpdateBookingAsync(Booking booking);
+        Task<List<BookingDto>> GetAllBookingsAsync();
+        Task<ApiResponse<BookingDto>> GetBookingByIdAsync(int id);
+        Task<ApiResponse<BookingDto>> AddBookingAsync(CreateBookingDto dto);
+        Task UpdateBookingAsync(BookingDto booking);
         Task DeleteBookingAsync(int id);
     }
 

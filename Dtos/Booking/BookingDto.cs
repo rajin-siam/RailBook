@@ -1,7 +1,7 @@
-﻿using RailBook.Domain.Dtos.Invoice;
-using RailBook.Domain.Dtos.Passenger;
+﻿using RailBook.Dtos.Invoice;
+using RailBook.Dtos.Passenger;
 
-namespace RailBook.Domain.Dtos.Booking
+namespace RailBook.Dtos.Booking
 {
     public class BookingDto
     {

@@ -1,7 +1,8 @@
 ﻿using AutoMapper;
 using Microsoft.AspNetCore.Mvc;
-using RailBook.Domain.Dtos.InvoiceDetails;
+using RailBook.Dtos.InvoiceDetails;
 using RailBook.Manager.Implementations;
+using RailBook.Manager.Interfaces;
 
 namespace RailBook.Controllers
 {
@@ -9,10 +10,10 @@ namespace RailBook.Controllers
     [ApiController]
     public class InvoiceDetailsController : ControllerBase
     {
-        private readonly InvoiceDetailsService _service;
+        private readonly IInvoiceDetailsService _service;
         private readonly IMapper _mapper;
 
-        public InvoiceDetailsController(InvoiceDetailsService service, IMapper mapper)
+        public InvoiceDetailsController(IInvoiceDetailsService service, IMapper mapper)
         {
             _service = service;
             _mapper = mapper;
@@ -36,7 +37,7 @@ namespace RailBook.Controllers
         [HttpPost]
         public async Task<ActionResult<InvoiceDetailsDto>> Create([FromBody] CreateInvoiceDetailsDto dto)
         {
-            var detail = _mapper.Map<InvoiceDetails>(dto);
+            var detail = _mapper.Map<InvoiceDetailsDto>(dto);
             await _service.AddAsync(detail);
             return CreatedAtAction(nameof(GetById), new { id = detail.Id }, _mapper.Map<InvoiceDetailsDto>(detail));
         }

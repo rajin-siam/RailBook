@@ -1,4 +1,4 @@
-﻿namespace RailBook.Domain.Dtos.Service
+﻿namespace RailBook.Dtos.Service
 {
     public class TrainServiceDto
     {

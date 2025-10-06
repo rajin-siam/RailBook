@@ -1,4 +1,4 @@
-﻿namespace RailBook.Domain.Dtos.Invoice
+﻿namespace RailBook.Dtos.Invoice
 {
     public class UpdateInvoiceDto
     {

@@ -1,57 +1,114 @@
-﻿using AutoMapper;
+﻿using Mapster;
+using RailBook.ApiModels;
 using RailBook.DataAccess.Interfaces;
-using RailBook.Domain.Dtos.Booking;
+using RailBook.Dtos.Booking;
+using RailBook.Manager.Interfaces;
 
 
 namespace RailBook.Manager.Implementations
 {
-    public class BookingService
+    public class BookingService : IBookingService
     {
         private readonly IBookingRepository _bookingRepository;
-        private readonly IMapper _mapper;
-        private readonly InvoiceService _invoiceService;
+        private readonly IInvoiceService _invoiceService;
 
-        public BookingService(IBookingRepository bookingRepository, InvoiceService invoiceService, IMapper mapper)
+        public BookingService(IBookingRepository bookingRepository, IInvoiceService invoiceService)
         {
             _bookingRepository = bookingRepository;
-            _mapper = mapper;
             _invoiceService = invoiceService;
         }
 
-        public async Task<List<Booking>> GetAllBookingsAsync()
+        public async Task<List<BookingDto>> GetAllBookingsAsync()
         {
-            return await _bookingRepository.GetAllAsync();
+            var bookings = await _bookingRepository.GetAllAsync();
+            return bookings.Adapt<List<BookingDto>>();
         }
 
-        public async Task<Booking?> GetBookingByIdAsync(int id)
+        public async Task<ApiResponse<BookingDto>> GetBookingByIdAsync(int id)
         {
-            return await _bookingRepository.GetByIdAsync(id);
-        }
-
-        public async Task<Booking?> AddBookingAsync(CreateBookingDto dto)
-        {
-            var booking = _mapper.Map<Booking>(dto);
-            booking.Status = "Confirmed";
-            booking.BookingDate = DateTime.UtcNow;
-            booking.CreatedBy = 1;
-            booking.CreatedAt = DateTime.UtcNow;
-
-            if (booking.Passengers != null && booking.Passengers.Any())
+            var booking = await _bookingRepository.GetByIdAsync(id);
+            if (booking == null)
             {
-                foreach (var passenger in booking.Passengers)
+                // Create ApiResponse with 404
+                return new ApiResponse<BookingDto>
                 {
-                    passenger.CreatedBy = booking.CreatedBy; // or current user
-                    passenger.CreatedAt = DateTime.UtcNow;
-                }
+                    StatusCode = StatusCodes.Status404NotFound,  // ⬅️ Service decides
+                    Success = false,
+                    Message = "Booking not found",
+                    Data = null,
+                    Errors = new List<string> { $"No booking with ID {id}" },
+                    Timestamp = DateTime.UtcNow
+                };
             }
-            booking.Invoice = await _invoiceService.GenerateInvoiceAsync(booking);
-            await _bookingRepository.AddAsync(booking);
-            return booking;
+            var dto = booking.Adapt<BookingDto>();
+
+            // Create ApiResponse with 200
+            return new ApiResponse<BookingDto>
+            {
+                StatusCode = StatusCodes.Status200OK,  // ⬅️ Service decides
+                Success = true,
+                Message = "Booking retrieved successfully",
+                Data = dto,
+                Errors = null,
+                Timestamp = DateTime.UtcNow
+            };
+        }
+
+
+        public async Task<ApiResponse<BookingDto>> AddBookingAsync(CreateBookingDto dto)
+        {
+            try
+            {
+                var booking = dto.Adapt<Booking>();
+
+                booking.Status = "Confirmed";
+                booking.BookingDate = DateTime.UtcNow;
+                booking.CreatedBy = 1;
+                booking.CreatedAt = DateTime.UtcNow;
+
+
+
+                if (booking.Passengers != null && booking.Passengers.Any())
+                {
+                    foreach (var passenger in booking.Passengers)
+                    {
+                        passenger.CreatedBy = booking.CreatedBy; // or current user
+                        passenger.CreatedAt = DateTime.UtcNow;
+                    }
+                }
+                booking.Invoice = await _invoiceService.GenerateInvoiceAsync(booking);
+                await _bookingRepository.AddAsync(booking);
+                
+                return new ApiResponse<BookingDto>
+                {
+                    StatusCode = StatusCodes.Status201Created,
+                    Success = true,
+                    Message = "Booking created successfully",
+                    Data = booking.Adapt<BookingDto>(),
+                    Errors = null,
+                    Timestamp = DateTime.UtcNow
+                };
+
+            }
+            catch (Exception ex)
+            {
+                // Log the exception (not shown here for brevity)
+                return new ApiResponse<BookingDto>
+                {
+                    StatusCode = StatusCodes.Status500InternalServerError,
+                    Success = false,
+                    Message = "An error occurred while creating the booking",
+                    Data = null,
+                    Errors = new List<string> { ex.Message },
+                    Timestamp = DateTime.UtcNow
+                };
+            }
 
         }
 
-        public async Task UpdateBookingAsync(Booking booking)
-        {
+        public async Task UpdateBookingAsync(BookingDto bookingDto)
+        {   
+            var booking = bookingDto.Adapt<Booking>();
             await _bookingRepository.UpdateAsync(booking);
         }
 
@@ -59,5 +116,6 @@ namespace RailBook.Manager.Implementations
         {
             await _bookingRepository.DeleteAsync(id);
         }
+
     }
 }

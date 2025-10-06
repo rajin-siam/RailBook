@@ -1,4 +1,4 @@
-﻿namespace RailBook.Domain.Dtos.Booking
+﻿namespace RailBook.Dtos.Booking
 {
     public class UpdateBookingDto
     {

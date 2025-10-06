@@ -1,4 +1,4 @@
-﻿namespace RailBook.Domain.Dtos.InvoiceDetails
+﻿namespace RailBook.Dtos.InvoiceDetails
 {
     public class InvoiceDetailsDto
     {

@@ -1,8 +1,11 @@
-﻿using RailBook.DataAccess.Interfaces;
+﻿using Mapster;
+using RailBook.DataAccess.Interfaces;
+using RailBook.Dtos.Passenger;
+using RailBook.Manager.Interfaces;
 
 namespace RailBook.Manager.Implementations
 {
-    public class PassengerService
+    public class PassengerService : IPassengerService
     {
         private readonly IPassengerRepository _passengerRepository;
 
@@ -11,29 +14,33 @@ namespace RailBook.Manager.Implementations
             _passengerRepository = passengerRepository;
         }
 
-        public async Task<List<Passenger>> GetAllPassengersAsync()
+        public async Task<List<PassengerDto>> GetAllPassengersAsync()
         {
-            return await _passengerRepository.GetAllAsync();
+            var passengerList =  await _passengerRepository.GetAllAsync();
+            return passengerList.Adapt<List<PassengerDto>>();
         }
 
-        public async Task<Passenger?> GetPassengerByIdAsync(int id)
+        public async Task<PassengerDto?> GetPassengerByIdAsync(int id)
         {
-            return await _passengerRepository.GetByIdAsync(id);
+            return (await _passengerRepository.GetByIdAsync(id)).Adapt<PassengerDto>();
         }
 
-        public async Task AddPassengerAsync(Passenger passenger)
+        public async Task AddPassengerAsync(PassengerDto passengerDto)
         {
+            var passenger = passengerDto.Adapt<Passenger>();
             await _passengerRepository.AddAsync(passenger);
         }
 
-        public async Task UpdatePassengerAsync(Passenger passenger)
+        public async Task UpdatePassengerAsync(PassengerDto passenger)
         {
-            await _passengerRepository.UpdateAsync(passenger);
+            await _passengerRepository.UpdateAsync(passenger.Adapt<Passenger>());
         }
 
         public async Task DeletePassengerAsync(int id)
         {
             await _passengerRepository.DeleteAsync(id);
         }
+
+
     }
 }

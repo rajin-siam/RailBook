@@ -1,6 +1,6 @@
-﻿using RailBook.Domain.Dtos.Service;
+﻿using RailBook.Dtos.Service;
 
-namespace RailBook.Domain.Dtos.Passenger
+namespace RailBook.Dtos.Passenger
 {
     public class PassengerDto
     {

@@ -1,4 +1,4 @@
-﻿namespace RailBook.Domain.Dtos.Passenger
+﻿namespace RailBook.Dtos.Passenger
 {
     public class UpdatePassengerDto
     {

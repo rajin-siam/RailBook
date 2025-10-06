@@ -1,13 +1,14 @@
 ﻿using RailBook.Domain.Entities;
+using RailBook.Dtos.User;
 
 namespace RailBook.Manager.Interfaces
 {
     public interface IUserService
     {
-        Task<List<User>> GetAllUsersAsync();
-        Task<User?> GetUserByIdAsync(int id);
-        Task AddUserAsync(User user);
-        Task UpdateUserAsync(User user);
+        Task<List<UserDto>> GetAllUsersAsync();
+        Task<UserDto?> GetUserByIdAsync(int id);
+        Task AddUserAsync(CreateUserDto userDto);
+        Task UpdateUserAsync(UserDto userDto);
         Task DeleteUserAsync(int id);
     }
 }

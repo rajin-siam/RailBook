@@ -1,7 +1,9 @@
 ﻿using AutoMapper;
+using Mapster;
 using Microsoft.AspNetCore.Mvc;
-using RailBook.Domain.Dtos.Booking;
+using RailBook.Dtos.Booking;
 using RailBook.Manager.Implementations;
+using RailBook.Manager.Interfaces;
 
 
 namespace RailBook.Controllers
@@ -10,51 +12,34 @@ namespace RailBook.Controllers
     [ApiController]
     public class BookingsController : ControllerBase
     {
-        private readonly BookingService _service;
-        private readonly IMapper _mapper;
+        private readonly IBookingService _service;
 
-        public BookingsController(BookingService service, IMapper mapper)
+        public BookingsController(IBookingService service)
         {
             _service = service;
-            _mapper = mapper;
         }
 
         [HttpGet]
         public async Task<ActionResult<List<BookingDto>>> GetAll()
         {
             var bookings = await _service.GetAllBookingsAsync();
-            return Ok(_mapper.Map<List<BookingDto>>(bookings));
+            return Ok(bookings.Adapt<List<BookingDto>>());
         }
 
         [HttpGet("{id}")]
-        public async Task<ActionResult<BookingDto>> GetById(int id)
+        public async Task<IActionResult> GetById(int id)
         {
-            var booking = await _service.GetBookingByIdAsync(id);
-            if (booking == null) return NotFound();
-            return Ok(_mapper.Map<BookingDto>(booking));
+            var apiResponse = await _service.GetBookingByIdAsync(id);
+            return StatusCode(apiResponse.StatusCode, apiResponse);
         }
 
         [HttpPost]
-        public async Task<ActionResult<BookingDto>> Create([FromBody] CreateBookingDto dto)
+        public async Task<IActionResult> Create([FromBody] CreateBookingDto dto)
         {
-            
-            var createdBooking = await _service.AddBookingAsync(dto);
+            var apiResponse = await _service.AddBookingAsync(dto);
 
-            if (createdBooking == null)
-            {
-                return NotFound();
-            }
-
-            // Map the complete entity back to DTO
-            var bookingDto = _mapper.Map<BookingDto>(createdBooking);
-
-
-            // Return 201 Created with full BookingDto in response body
-            return CreatedAtAction(
-                nameof(GetById),
-                new { id = createdBooking.Id },
-                bookingDto
-            );
+            // Pass to StatusCode() method
+            return StatusCode(apiResponse.StatusCode, apiResponse);
         }
 
         //[HttpPut("{id}")]

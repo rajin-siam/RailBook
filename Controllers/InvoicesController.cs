@@ -1,7 +1,8 @@
 ﻿using AutoMapper;
 using Microsoft.AspNetCore.Mvc;
-using RailBook.Domain.Dtos.Invoice;
+using RailBook.Dtos.Invoice;
 using RailBook.Manager.Implementations;
+using RailBook.Manager.Interfaces;
 
 namespace RailBook.Controllers
 {
@@ -9,10 +10,10 @@ namespace RailBook.Controllers
     [ApiController]
     public class InvoicesController : ControllerBase
     {
-        private readonly InvoiceService _service;
+        private readonly IInvoiceService _service;
         private readonly IMapper _mapper;
 
-        public InvoicesController(InvoiceService service, IMapper mapper)
+        public InvoicesController(IInvoiceService service, IMapper mapper)
         {
             _service = service;
             _mapper = mapper;

@@ -1,8 +1,11 @@
-﻿using RailBook.DataAccess.Interfaces;
+﻿using Mapster;
+using RailBook.DataAccess.Interfaces;
+using RailBook.Dtos.Invoice;
+using RailBook.Manager.Interfaces;
 
 namespace RailBook.Manager.Implementations
 {
-    public class InvoiceService
+    public class InvoiceService : IInvoiceService
     {
         private readonly IInvoiceRepository _invoiceRepository;
 
@@ -11,14 +14,16 @@ namespace RailBook.Manager.Implementations
             _invoiceRepository = invoiceRepository;
         }
 
-        public async Task<List<Invoice>> GetAllInvoicesAsync()
+        public async Task<List<InvoiceDto>> GetAllInvoicesAsync()
         {
-            return await _invoiceRepository.GetAllAsync();
+            var invoice = await _invoiceRepository.GetAllAsync();
+            return invoice.Adapt<List<InvoiceDto>>();
         }
 
-        public async Task<Invoice?> GetInvoiceByIdAsync(int id)
+        public async Task<InvoiceDto?> GetInvoiceByIdAsync(int id)
         {
-            return await _invoiceRepository.GetByIdAsync(id);
+            var invoice = await _invoiceRepository.GetByIdAsync(id);
+            return invoice?.Adapt<InvoiceDto>();
         }
 
         public async Task AddInvoiceAsync(Invoice invoice)
@@ -26,9 +31,9 @@ namespace RailBook.Manager.Implementations
             await _invoiceRepository.AddAsync(invoice);
         }
 
-        public async Task UpdateInvoiceAsync(Invoice invoice)
+        public async Task UpdateInvoiceAsync(InvoiceDto invoiceDto)
         {
-            await _invoiceRepository.UpdateAsync(invoice);
+            await _invoiceRepository.UpdateAsync(invoiceDto.Adapt<Invoice>());
         }
 
         public async Task DeleteInvoiceAsync(int id)
@@ -65,5 +70,6 @@ namespace RailBook.Manager.Implementations
             //await AddInvoiceAsync(invoice);
             return invoice; 
         }
+
     }
 }
