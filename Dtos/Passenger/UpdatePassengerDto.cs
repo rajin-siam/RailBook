@@ -1,9 +1,13 @@
-﻿namespace RailBook.Dtos.Passenger
+﻿using RailBook.Dtos.Service;
+
+namespace RailBook.Dtos.Passenger
 {
     public class UpdatePassengerDto
     {
-        public string? Name { get; set; }
-        public int? Age { get; set; }
-        public string? Gender { get; set; }
+        public int Id { get; set; }
+        public string Name { get; set; } = string.Empty;
+        public int Age { get; set; }
+        public string Gender { get; set; } = string.Empty;
+        public List<UpdateTrainServiceDto>? TrainServices { get; set; }
     }
 }

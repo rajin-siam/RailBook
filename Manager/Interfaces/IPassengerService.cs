@@ -1,4 +1,5 @@
-﻿using RailBook.Dtos.Passenger;
+﻿using RailBook.Dtos.Booking;
+using RailBook.Dtos.Passenger;
 
 namespace RailBook.Manager.Interfaces
 {
@@ -7,7 +8,7 @@ namespace RailBook.Manager.Interfaces
         Task<List<PassengerDto>> GetAllPassengersAsync();
         Task<PassengerDto?> GetPassengerByIdAsync(int id);
         Task AddPassengerAsync(PassengerDto passengerDto);
-        Task UpdatePassengerAsync(PassengerDto passenger);
+        Task UpdatePassengerAsync(Booking existingBooking, UpdateBookingDto updatedBookingDto);
         Task DeletePassengerAsync(int id);
     }
 }

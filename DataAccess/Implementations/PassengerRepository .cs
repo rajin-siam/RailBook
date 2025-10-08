@@ -41,7 +41,6 @@ namespace RailBook.DataAccess.Implementations
             if (passenger != null)
             {
                 _context.Passengers.Remove(passenger);
-                await _context.SaveChangesAsync();
             }
         }
     }

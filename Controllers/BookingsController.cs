@@ -42,6 +42,13 @@ namespace RailBook.Controllers
             return StatusCode(apiResponse.StatusCode, apiResponse);
         }
 
+        [HttpPut("{id}")]
+        public async Task<IActionResult> Update(int id, [FromBody] UpdateBookingDto dto)
+        {
+            var apiResponse = await _service.UpdateBookingAsync(id, dto);
+            return StatusCode(apiResponse.StatusCode, apiResponse);
+        }
+
         //[HttpPut("{id}")]
         //public async Task<IActionResult> Update(int id, [FromBody] UpdateBookingDto dto)
         //{

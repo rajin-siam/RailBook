@@ -46,30 +46,35 @@ namespace RailBook.Manager.Implementations
             if (booking == null)
                 throw new Exception("Booking not found");
 
-            // Step 1: Base fare = ticket price × number of passengers
             int passengerCount = booking.Passengers.Count;
             int baseFare = booking.PerTicketPrice * passengerCount;
-
-            // Step 2: Extra services cost (sum for all passengers)
             int serviceCost = booking.Passengers
                 .SelectMany(p => p.TrainServices)
-                .Sum(s => s.Price);   // assumes TrainService has a Price field
-
+                .Sum(s => s.Price);
             int totalAmount = baseFare + serviceCost;
 
+            var invoice = booking.Invoice; // get existing invoice if present
 
-
-            // Step 3: Create Invoice
-            var invoice = new Invoice
+            if (invoice == null)
             {
-                BookingId = booking.Id,
-                TotalAmount = totalAmount,
-                CreatedBy = 1,
-                CreatedAt = DateTime.UtcNow
-            };
-            //await AddInvoiceAsync(invoice);
-            return invoice; 
+                invoice = new Invoice
+                {
+                    BookingId = booking.Id,
+                    CreatedBy = 1,
+                    CreatedAt = DateTime.UtcNow,
+                    TotalAmount = totalAmount
+                };
+                return invoice;
+            }
+
+            // Update values
+            invoice.TotalAmount = totalAmount;
+            invoice.ModifiedById = 1;
+            invoice.ModifiedAt = DateTime.UtcNow;
+
+            return invoice;
         }
+
 
     }
 }

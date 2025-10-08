@@ -30,8 +30,8 @@ namespace RailBook.DataAccess.Implementations
 
         public async Task UpdateAsync(Booking booking)
         {
-            _context.Bookings.Update(booking);
             await _context.SaveChangesAsync();
+
         }
 
         public async Task DeleteAsync(int id)
