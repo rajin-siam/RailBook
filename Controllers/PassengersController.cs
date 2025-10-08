@@ -36,17 +36,7 @@ namespace RailBook.Controllers
         }
 
 
-        [HttpPut("{id}")]
-        public async Task<IActionResult> Update(int id, [FromBody] UpdatePassengerDto dto)
-        {
-            var passenger = await _service.GetPassengerByIdAsync(id);
-            if (passenger == null) return NotFound();
-
-            _mapper.Map(dto, passenger);
-            await _service.UpdatePassengerAsync(passenger);
-            return NoContent();
-        }
-
+        
         [HttpDelete("{id}")]
         public async Task<IActionResult> Delete(int id)
         {

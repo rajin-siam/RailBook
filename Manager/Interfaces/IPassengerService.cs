@@ -8,7 +8,10 @@ namespace RailBook.Manager.Interfaces
         Task<List<PassengerDto>> GetAllPassengersAsync();
         Task<PassengerDto?> GetPassengerByIdAsync(int id);
         Task AddPassengerAsync(PassengerDto passengerDto);
-        Task UpdatePassengerAsync(Booking existingBooking, UpdateBookingDto updatedBookingDto);
+
+        // ✅ Updated method signature - now handles both passengers AND train services
+        Task UpdatePassengersWithServicesAsync(Booking existingBooking, UpdateBookingDto updatedBookingDto);
+
         Task DeletePassengerAsync(int id);
     }
 }

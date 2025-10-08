@@ -1,12 +1,8 @@
 ﻿using Mapster;
-using Microsoft.EntityFrameworkCore;
 using RailBook.ApiModels;
-using RailBook.Controllers;
-using RailBook.DataAccess.Implementations;
 using RailBook.DataAccess.Interfaces;
 using RailBook.Dtos.Booking;
 using RailBook.Manager.Interfaces;
-
 
 namespace RailBook.Manager.Implementations
 {
@@ -15,12 +11,18 @@ namespace RailBook.Manager.Implementations
         private readonly IBookingRepository _bookingRepository;
         private readonly IInvoiceService _invoiceService;
         private readonly IPassengerService _passengerService;
+        private readonly ITrainServiceService _trainServiceService;
 
-        public BookingService(IBookingRepository bookingRepository, IInvoiceService invoiceService, IPassengerService passengerService)
+        public BookingService(
+            IBookingRepository bookingRepository,
+            IInvoiceService invoiceService,
+            IPassengerService passengerService,
+            ITrainServiceService trainServiceService)
         {
             _bookingRepository = bookingRepository;
             _invoiceService = invoiceService;
             _passengerService = passengerService;
+            _trainServiceService = trainServiceService;
         }
 
         public async Task<List<BookingDto>> GetAllBookingsAsync()
@@ -39,10 +41,9 @@ namespace RailBook.Manager.Implementations
             var booking = await _bookingRepository.GetByIdAsync(id);
             if (booking == null)
             {
-                // Create ApiResponse with 404
                 return new ApiResponse<BookingDto>
                 {
-                    StatusCode = StatusCodes.Status404NotFound,  // ⬅️ Service decides
+                    StatusCode = StatusCodes.Status404NotFound,
                     Success = false,
                     Message = "Booking not found",
                     Data = null,
@@ -50,12 +51,11 @@ namespace RailBook.Manager.Implementations
                     Timestamp = DateTime.UtcNow
                 };
             }
-            var dto = booking.Adapt<BookingDto>();
 
-            // Create ApiResponse with 200
+            var dto = booking.Adapt<BookingDto>();
             return new ApiResponse<BookingDto>
             {
-                StatusCode = StatusCodes.Status200OK,  // ⬅️ Service decides
+                StatusCode = StatusCodes.Status200OK,
                 Success = true,
                 Message = "Booking retrieved successfully",
                 Data = dto,
@@ -64,30 +64,45 @@ namespace RailBook.Manager.Implementations
             };
         }
 
-
         public async Task<ApiResponse<BookingDto>> AddBookingAsync(CreateBookingDto dto)
         {
             try
             {
+                // Step 1: Convert DTO to entity
                 var booking = dto.Adapt<Booking>();
 
+                // Step 2: Set booking metadata
                 booking.Status = "Confirmed";
+                booking.BookingDate = DateTime.UtcNow;
                 booking.CreatedBy = 1;
                 booking.CreatedAt = DateTime.UtcNow;
 
-
-
+                // Step 3: Set passenger metadata
                 if (booking.Passengers != null && booking.Passengers.Any())
                 {
                     foreach (var passenger in booking.Passengers)
                     {
-                        passenger.CreatedBy = booking.CreatedBy; // or current user
+                        passenger.CreatedBy = 1;
                         passenger.CreatedAt = DateTime.UtcNow;
+
+                        // Set train service metadata for each passenger
+                        if (passenger.TrainServices != null && passenger.TrainServices.Any())
+                        {
+                            foreach (var service in passenger.TrainServices)
+                            {
+                                service.CreatedBy = 1;
+                                service.CreatedAt = DateTime.UtcNow;
+                            }
+                        }
                     }
                 }
+
+                // Step 4: Generate invoice (calculates total automatically)
                 booking.Invoice = await _invoiceService.GenerateInvoiceAsync(booking);
+
+                // Step 5: Save everything to database (EF Core handles the cascade)
                 await _bookingRepository.AddAsync(booking);
-                
+
                 return new ApiResponse<BookingDto>
                 {
                     StatusCode = StatusCodes.Status201Created,
@@ -97,11 +112,9 @@ namespace RailBook.Manager.Implementations
                     Errors = null,
                     Timestamp = DateTime.UtcNow
                 };
-
             }
             catch (Exception ex)
             {
-                // Log the exception (not shown here for brevity)
                 return new ApiResponse<BookingDto>
                 {
                     StatusCode = StatusCodes.Status500InternalServerError,
@@ -112,75 +125,72 @@ namespace RailBook.Manager.Implementations
                     Timestamp = DateTime.UtcNow
                 };
             }
-
         }
 
-       public async Task<ApiResponse<BookingDto>> UpdateBookingAsync(int id, UpdateBookingDto updatedBookingDto)
-{
-    // Start transaction
-    using var transaction = await _context.Database.BeginTransactionAsync();
-    
-    try
-    {
-        var existingBooking = await GetBookingById(id);
-
-        if (existingBooking == null)
+        public async Task<ApiResponse<BookingDto>> UpdateBookingAsync(int id, UpdateBookingDto updatedBookingDto)
         {
-            return new ApiResponse<BookingDto>
+            try
             {
-                StatusCode = StatusCodes.Status404NotFound,
-                Success = false,
-                Message = "Booking not found"
-            };
+                // Step 1: Get existing booking with all related data (lazy loading will load them)
+                var existingBooking = await GetBookingById(id);
+
+                if (existingBooking == null)
+                {
+                    return new ApiResponse<BookingDto>
+                    {
+                        StatusCode = StatusCodes.Status404NotFound,
+                        Success = false,
+                        Message = "Booking not found",
+                        Data = null,
+                        Errors = new List<string> { $"No booking with ID {id}" },
+                        Timestamp = DateTime.UtcNow
+                    };
+                }
+
+                // Step 2: Update basic booking fields
+                existingBooking.Source = updatedBookingDto.Source;
+                existingBooking.Destination = updatedBookingDto.Destination;
+                existingBooking.PerTicketPrice = updatedBookingDto.PerTicketPrice;
+                existingBooking.Status = updatedBookingDto.Status;
+                existingBooking.ModifiedById = 1;
+                existingBooking.ModifiedAt = DateTime.UtcNow;
+
+                // Step 3: Update passengers (this handles add/update/delete of passengers AND their services)
+                await _passengerService.UpdatePassengersWithServicesAsync(existingBooking, updatedBookingDto);
+
+                // Step 4: Recalculate and update invoice
+                existingBooking.Invoice = await _invoiceService.GenerateInvoiceAsync(existingBooking);
+
+                // Step 5: Save all changes (EF Core tracks everything)
+                await _bookingRepository.UpdateAsync(existingBooking);
+
+                return new ApiResponse<BookingDto>
+                {
+                    StatusCode = StatusCodes.Status200OK,
+                    Success = true,
+                    Message = "Booking updated successfully",
+                    Data = existingBooking.Adapt<BookingDto>(),
+                    Errors = null,
+                    Timestamp = DateTime.UtcNow
+                };
+            }
+            catch (Exception ex)
+            {
+                return new ApiResponse<BookingDto>
+                {
+                    StatusCode = StatusCodes.Status500InternalServerError,
+                    Success = false,
+                    Message = "An error occurred while updating the booking",
+                    Data = null,
+                    Errors = new List<string> { ex.Message },
+                    Timestamp = DateTime.UtcNow
+                };
+            }
         }
 
-        // 1️⃣ Update parent fields
-        existingBooking.Source = updatedBookingDto.Source;
-        existingBooking.Destination = updatedBookingDto.Destination;
-        existingBooking.PerTicketPrice = updatedBookingDto.PerTicketPrice;
-        existingBooking.ModifiedById = 1;
-        existingBooking.ModifiedAt = DateTime.UtcNow;
-
-        // 2️⃣ Update passengers (without saving)
-        await _passengerService.UpdatePassengerAsync(existingBooking, updatedBookingDto);
-
-        // 3️⃣ Recalculate invoice
-        existingBooking.Invoice = await _invoiceService.GenerateInvoiceAsync(existingBooking);
-
-        // 4️⃣ Save ALL changes in ONE transaction
-        await _context.SaveChangesAsync();
-        
-        // 5️⃣ Commit transaction
-        await transaction.CommitAsync();
-
-        return new ApiResponse<BookingDto>
-        {
-            StatusCode = StatusCodes.Status200OK,
-            Success = true,
-            Message = "Booking updated successfully",
-            Data = existingBooking.Adapt<BookingDto>(),
-            Timestamp = DateTime.UtcNow
-        };
-    }
-    catch (Exception ex)
-    {
-        // Rollback on any error
-        await transaction.RollbackAsync();
-        
-        return new ApiResponse<BookingDto>
-        {
-            StatusCode = StatusCodes.Status500InternalServerError,
-            Success = false,
-            Message = "An error occurred while updating the booking",
-            Errors = new List<string> { ex.Message },
-            Timestamp = DateTime.UtcNow
-        };
-    }
-}
         public async Task DeleteBookingAsync(int id)
         {
             await _bookingRepository.DeleteAsync(id);
         }
-
     }
 }

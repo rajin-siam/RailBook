@@ -1,5 +1,4 @@
 ﻿using RailBook.ApiModels;
-using RailBook.Domain.Entities;
 using RailBook.Dtos.Booking;
 
 namespace RailBook.Manager.Interfaces
@@ -9,8 +8,10 @@ namespace RailBook.Manager.Interfaces
         Task<List<BookingDto>> GetAllBookingsAsync();
         Task<ApiResponse<BookingDto>> GetBookingByIdAsync(int id);
         Task<ApiResponse<BookingDto>> AddBookingAsync(CreateBookingDto dto);
-        Task UpdateBookingAsync(BookingDto booking);
+
+        // ✅ Updated signature to match implementation
+        Task<ApiResponse<BookingDto>> UpdateBookingAsync(int id, UpdateBookingDto updatedBookingDto);
+
         Task DeleteBookingAsync(int id);
     }
-
 }
