@@ -89,7 +89,8 @@ builder.Services.AddAuthentication(options =>
     };
 });
 
-
+// Add this line to access HttpContext in services
+builder.Services.AddHttpContextAccessor();
 
 // ===== 4. Add Authorization =====
 builder.Services.AddAuthorization();

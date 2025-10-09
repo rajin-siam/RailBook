@@ -1,11 +1,12 @@
-﻿using System.IdentityModel.Tokens.Jwt;
-using System.Security.Claims;
-using System.Text;
-using Microsoft.Extensions.Options;
+﻿using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using RailBook.Configuration;
 using RailBook.Domain.Entities;
 using RailBook.Manager.Interfaces;
+using System.IdentityModel.Tokens.Jwt;
+using System.Security.Claims;
+using System.Security.Cryptography;
+using System.Text;
 
 namespace RailBook.Manager.Implementations
 {
@@ -23,7 +24,7 @@ namespace RailBook.Manager.Implementations
         /// Generates a JWT token for the given user
         /// User entity to create token for
         /// JWT token string
-        public string GenerateToken(User user)
+        public string GenerateAccessToken(User user)
         {
             // 1. Create claims (information stored in the token)
             var claims = new List<Claim>
@@ -75,7 +76,7 @@ namespace RailBook.Manager.Implementations
             var tokenDescriptor = new SecurityTokenDescriptor
             {
                 Subject = new ClaimsIdentity(claims),
-                Expires = DateTime.UtcNow.AddMinutes(_jwtSettings.ExpiryMinutes),
+                Expires = DateTime.UtcNow.AddMinutes(_jwtSettings.AccessTokenExpiryMinutes),
                 Issuer = _jwtSettings.Issuer,
                 Audience = _jwtSettings.Audience,
                 SigningCredentials = credentials
@@ -89,9 +90,20 @@ namespace RailBook.Manager.Implementations
             return tokenHandler.WriteToken(token);
         }
 
+
+
+        /// Generate a cryptographically secure refresh token
+        public string GenerateRefreshToken()
+        {
+            var randomNumber = new byte[64];
+            using var rng = RandomNumberGenerator.Create();
+            rng.GetBytes(randomNumber);
+            return Convert.ToBase64String(randomNumber);
+        }
+
         /// Validates a JWT token and returns the claims principal
         /// ClaimsPrincipal if valid, null otherwise
-        public ClaimsPrincipal? ValidateToken(string token)
+        public ClaimsPrincipal? ValidateToken(string token, bool ignoreExpiry = false)
         {
             /* Step 1: Create a token handler
              * ------------------------------
@@ -140,7 +152,7 @@ namespace RailBook.Manager.Implementations
                         ValidIssuer = _jwtSettings.Issuer,
                         ValidateAudience = true,
                         ValidAudience = _jwtSettings.Audience,
-                        ValidateLifetime = true,
+                        ValidateLifetime = !ignoreExpiry,
                         ClockSkew = TimeSpan.Zero // No grace period for expired tokens
                     },
                     out SecurityToken validatedToken // Output: stores the validated token if successful

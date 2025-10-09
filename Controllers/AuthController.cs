@@ -70,5 +70,31 @@ namespace RailBook.Controllers
                 Timestamp = DateTime.UtcNow
             });
         }
+
+
+        [HttpPost("refresh")]
+        [AllowAnonymous]
+        public async Task<IActionResult> RefreshToken([FromBody] RefreshTokenDto dto)
+        {
+            var response = await _authService.RefreshTokenAsync(dto);
+            return StatusCode(response.StatusCode, response);
+        }
+
+
+
+        [Authorize]
+        [HttpPost("logout")]
+        public async Task<IActionResult> Logout()
+        {
+            // Get the user ID from the token claims
+            var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+
+            if (string.IsNullOrEmpty(userIdClaim) || !int.TryParse(userIdClaim, out int userId))
+                return Unauthorized("Invalid user ID in token.");
+
+            var response = await _authService.LogoutAsync(userId);
+            return StatusCode(response.StatusCode, response);
+        }
+
     }
 }

@@ -15,6 +15,9 @@ namespace RailBook.Domain.Entities
         public int? ModifiedById { get; set; }
         public DateTime? ModifiedAt { get; set; }
 
+        public string? RefreshToken { get; set; }
+        public DateTime? RefreshTokenExpiryTime { get; set; }
+
         // No navigation properties needed for audit-only relationships
 
         public class Configuration : IEntityTypeConfiguration<User>

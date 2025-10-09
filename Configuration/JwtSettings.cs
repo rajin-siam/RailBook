@@ -15,6 +15,7 @@
         public string Audience { get; set; } = string.Empty;
 
         // How long the token is valid (in minutes)
-        public int ExpiryMinutes { get; set; } = 60;
+        public int AccessTokenExpiryMinutes { get; set; } = 60;
+        public double RefreshTokenExpiryDays { get; internal set; }
     }
 }

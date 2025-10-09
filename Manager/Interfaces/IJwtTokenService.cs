@@ -6,7 +6,8 @@ namespace RailBook.Manager.Interfaces
     /// Service responsible for generating and validating JWT tokens
     public interface IJwtTokenService
     {
-        string GenerateToken(User user);
-        ClaimsPrincipal? ValidateToken(string token);
+        string GenerateAccessToken(User user);
+        string GenerateRefreshToken();
+        ClaimsPrincipal? ValidateToken(string token, bool ignoreExpiry);
     }
 }
