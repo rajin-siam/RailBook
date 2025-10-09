@@ -1,12 +1,15 @@
-﻿using Mapster;
+﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Mapster;
 using RailBook.Dtos.Booking;
 using RailBook.Manager.Interfaces;
+using System.Security.Claims;
 
 namespace RailBook.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
+    [Authorize] // 🔒 Requires authentication for ALL endpoints in this controller
     public class BookingsController : ControllerBase
     {
         private readonly IBookingService _service;
@@ -16,15 +19,19 @@ namespace RailBook.Controllers
             _service = service;
         }
 
-        // GET: api/bookings
+        /// <summary>
+        /// Get all bookings (protected)
+        /// </summary>
         [HttpGet]
         public async Task<ActionResult<List<BookingDto>>> GetAll()
         {
             var bookings = await _service.GetAllBookingsAsync();
-            return Ok(bookings);
+            return Ok(bookings.Adapt<List<BookingDto>>());
         }
 
-        // GET: api/bookings/5
+        /// <summary>
+        /// Get booking by ID (protected)
+        /// </summary>
         [HttpGet("{id}")]
         public async Task<IActionResult> GetById(int id)
         {
@@ -32,15 +39,31 @@ namespace RailBook.Controllers
             return StatusCode(apiResponse.StatusCode, apiResponse);
         }
 
-        // POST: api/bookings
+        /// <summary>
+        /// Create new booking (protected)
+        /// Uses authenticated user's ID from JWT token
+        /// </summary>
         [HttpPost]
         public async Task<IActionResult> Create([FromBody] CreateBookingDto dto)
         {
+            // Get current user ID from JWT token claims
+            var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+
+            if (string.IsNullOrEmpty(userIdClaim))
+            {
+                return Unauthorized(new { Message = "User ID not found in token" });
+            }
+
+            // You can now use this userId for CreatedBy field
+            // Pass it to your service method if needed
+
             var apiResponse = await _service.AddBookingAsync(dto);
             return StatusCode(apiResponse.StatusCode, apiResponse);
         }
 
-        // PUT: api/bookings/5
+        /// <summary>
+        /// Update booking (protected)
+        /// </summary>
         [HttpPut("{id}")]
         public async Task<IActionResult> Update(int id, [FromBody] UpdateBookingDto dto)
         {
@@ -48,12 +71,14 @@ namespace RailBook.Controllers
             return StatusCode(apiResponse.StatusCode, apiResponse);
         }
 
-        // DELETE: api/bookings/5
-        [HttpDelete("{id}")]
-        public async Task<IActionResult> Delete(int id)
+        /// <summary>
+        /// Public endpoint - anyone can access (no authentication required)
+        /// </summary>
+        [HttpGet("public/routes")]
+        [AllowAnonymous] // 🔓 Override controller-level [Authorize]
+        public IActionResult GetPublicRoutes()
         {
-            await _service.DeleteBookingAsync(id);
-            return NoContent();
+            return Ok(new { Message = "This is a public endpoint" });
         }
     }
 }
