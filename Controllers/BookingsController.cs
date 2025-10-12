@@ -23,7 +23,7 @@ namespace RailBook.Controllers
         /// Get all bookings (protected)
         /// </summary>
         [HttpGet]
-        public async Task<ActionResult<List<BookingDto>>> GetAll()
+        public async Task<IActionResult> GetAll()
         {
             var bookings = await _service.GetAllBookingsAsync();
             return Ok(bookings.Adapt<List<BookingDto>>());
@@ -79,6 +79,14 @@ namespace RailBook.Controllers
         public IActionResult GetPublicRoutes()
         {
             return Ok(new { Message = "This is a public endpoint" });
+        }
+
+        // Cancel booking (protected)
+        [HttpPatch("{id}")]
+        public async Task<IActionResult> Cancel(int id)
+        {
+            var apiResponse = await _service.CancelBookingAsync(id);
+            return StatusCode(apiResponse.StatusCode, apiResponse);
         }
     }
 }

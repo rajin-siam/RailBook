@@ -3,6 +3,7 @@ using RailBook.ApiModels;
 using RailBook.DataAccess.Interfaces;
 using RailBook.Dtos.Booking;
 using RailBook.Manager.Interfaces;
+using System.Security.Claims;
 
 namespace RailBook.Manager.Implementations
 {
@@ -12,23 +13,36 @@ namespace RailBook.Manager.Implementations
         private readonly IInvoiceService _invoiceService;
         private readonly IPassengerService _passengerService;
         private readonly ITrainServiceService _trainServiceService;
+        private readonly IHttpContextAccessor _httpContextAccessor;
 
         public BookingService(
             IBookingRepository bookingRepository,
             IInvoiceService invoiceService,
             IPassengerService passengerService,
-            ITrainServiceService trainServiceService)
+            ITrainServiceService trainServiceService,
+            IHttpContextAccessor httpContextAccessor)
         {
             _bookingRepository = bookingRepository;
             _invoiceService = invoiceService;
             _passengerService = passengerService;
             _trainServiceService = trainServiceService;
+            _httpContextAccessor = httpContextAccessor;
         }
 
-        public async Task<List<BookingDto>> GetAllBookingsAsync()
+        
+
+        public async Task<ApiResponse<List<BookingDto>>> GetAllBookingsAsync()
         {
             var bookings = await _bookingRepository.GetAllAsync();
-            return bookings.Adapt<List<BookingDto>>();
+            return new ApiResponse<List<BookingDto>>
+            {
+                StatusCode = StatusCodes.Status200OK,
+                Success = true,
+                Message = "Bookings retrieved successfully",
+                Data = bookings.Adapt<List<BookingDto>>(),
+                Errors = null,
+                Timestamp = DateTime.UtcNow
+            };
         }
 
         public async Task<Booking?> GetBookingById(int id)
@@ -191,6 +205,38 @@ namespace RailBook.Manager.Implementations
         public async Task DeleteBookingAsync(int id)
         {
             await _bookingRepository.DeleteAsync(id);
+        }
+
+        public async Task<ApiResponse<BookingDto>> CancelBookingAsync(int id)
+        {
+            var booking = await _bookingRepository.GetByIdAsync(id);
+            if (booking == null)
+            {
+                return new ApiResponse<BookingDto>
+                {
+                    StatusCode = StatusCodes.Status404NotFound,
+                    Success = false,
+                    Message = "Booking not found",
+                    Data = null,
+                    Errors = new List<string> { $"No booking with ID {id}" },
+                    Timestamp = DateTime.UtcNow
+                };
+            }
+
+            booking.Status = "Cancelled";
+            booking.ModifiedById = 1;
+            booking.ModifiedAt = DateTime.UtcNow;
+            await _bookingRepository.UpdateAsync(booking);
+            return new ApiResponse<BookingDto>
+            {
+                StatusCode = StatusCodes.Status200OK,
+                Success = true,
+                Message = "Booking cancelled successfully",
+                Data = booking.Adapt<BookingDto>(),
+                Errors = null,
+                Timestamp = DateTime.UtcNow
+            };
+
         }
     }
 }
