@@ -78,6 +78,22 @@ namespace RailBook.Manager.Implementations
             };
         }
 
+
+        public int? GetCurrentUserId()
+        {
+            var user = _httpContextAccessor.HttpContext?.User;
+
+            if (user == null || !user.Identity.IsAuthenticated)
+                return null;
+
+            // If you added "userId" or "sub" as claim in your token
+            var userIdClaim = user.FindFirst(ClaimTypes.NameIdentifier)?.Value
+                           ?? user.FindFirst("userId")?.Value;
+
+            return userIdClaim != null ? int.Parse(userIdClaim) : null;
+        }
+
+
         public async Task<ApiResponse<BookingDto>> AddBookingAsync(CreateBookingDto dto)
         {
             try
@@ -88,7 +104,7 @@ namespace RailBook.Manager.Implementations
                 // Step 2: Set booking metadata
                 booking.Status = "Confirmed";
                 booking.BookingDate = DateTime.UtcNow;
-                booking.CreatedBy = 1;
+                booking.CreatedBy = GetCurrentUserId() ?? 1; // Default to 1 if user ID not found
                 booking.CreatedAt = DateTime.UtcNow;
 
                 // Step 3: Set passenger metadata
@@ -166,7 +182,7 @@ namespace RailBook.Manager.Implementations
                 existingBooking.Destination = updatedBookingDto.Destination;
                 existingBooking.PerTicketPrice = updatedBookingDto.PerTicketPrice;
                 existingBooking.Status = updatedBookingDto.Status;
-                existingBooking.ModifiedById = 1;
+                existingBooking.ModifiedById = GetCurrentUserId() ?? 1; // Default to 1 if user ID not found
                 existingBooking.ModifiedAt = DateTime.UtcNow;
 
                 // Step 3: Update passengers (this handles add/update/delete of passengers AND their services)
@@ -224,7 +240,7 @@ namespace RailBook.Manager.Implementations
             }
 
             booking.Status = "Cancelled";
-            booking.ModifiedById = 1;
+            booking.ModifiedById = GetCurrentUserId() ?? 1; // Default to 1 if user ID not found
             booking.ModifiedAt = DateTime.UtcNow;
             await _bookingRepository.UpdateAsync(booking);
             return new ApiResponse<BookingDto>

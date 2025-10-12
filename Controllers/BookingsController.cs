@@ -25,8 +25,9 @@ namespace RailBook.Controllers
         [HttpGet]
         public async Task<IActionResult> GetAll()
         {
-            var bookings = await _service.GetAllBookingsAsync();
-            return Ok(bookings.Adapt<List<BookingDto>>());
+            var apiResponse = await _service.GetAllBookingsAsync();
+            return StatusCode(apiResponse.StatusCode, apiResponse);
+            
         }
 
         /// <summary>
@@ -46,16 +47,6 @@ namespace RailBook.Controllers
         [HttpPost]
         public async Task<IActionResult> Create([FromBody] CreateBookingDto dto)
         {
-            // Get current user ID from JWT token claims
-            var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-
-            if (string.IsNullOrEmpty(userIdClaim))
-            {
-                return Unauthorized(new { Message = "User ID not found in token" });
-            }
-
-            // You can now use this userId for CreatedBy field
-            // Pass it to your service method if needed
 
             var apiResponse = await _service.AddBookingAsync(dto);
             return StatusCode(apiResponse.StatusCode, apiResponse);
