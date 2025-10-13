@@ -18,9 +18,11 @@ namespace RailBook.DataAccess.Database
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
-            optionsBuilder
-                .UseLazyLoadingProxies()   // <--- Enable lazy loading here
-                .UseNpgsql("Host=localhost;Database=RailBookDb;Username=postgres;Password=iamdragon;");
+            // Only configure if not already configured by Program.cs
+            if (!optionsBuilder.IsConfigured)
+            {
+                optionsBuilder.UseLazyLoadingProxies();
+            }
         }
 
     }
